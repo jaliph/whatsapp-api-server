@@ -4,7 +4,7 @@ const qrcode = require('qrcode-terminal')
 const path = require('path')
 const fs = require('fs')
 
-const SESSION_FILE_PATH = path.resolve(__dirname + '../session.json')
+const SESSION_FILE_PATH = path.resolve(path.join(__dirname, '../session.json'))
 let sessionCfg
 if (fs.existsSync(SESSION_FILE_PATH)) {
   sessionCfg = require(SESSION_FILE_PATH)
