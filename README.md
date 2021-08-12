@@ -19,6 +19,11 @@ export AUTH_PASSWORD=Admin@123
 The above envs are mandatory to provide httpAuth to the exposed routes
 
 ## Usage
+
+Run  `npm start`
+
+A QR code will be displayed on the terminal, use that to authenticate from the Whatsapp Mobile.  This will create a session.json file. That file can be reused to setup the session again without scanning the qr code again.
+
 Routes exposed
 
 ```
