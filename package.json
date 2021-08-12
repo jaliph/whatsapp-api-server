@@ -1,0 +1,35 @@
+{
+  "name": "whatsapp-webserver",
+  "version": "1.0.0",
+  "description": "A sinple webserver to send messages..",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "morgan": "^1.10.0",
+    "qrcode-terminal": "^0.12.0",
+    "whatsapp-web.js": "^1.14.0"
+  },
+  "devDependencies": {
+    "pkg": "^5.2.1"
+  },
+  "scripts": {
+    "start": "node app.js",
+    "build": "pkg . --options max_old_space_size=4096"
+  },
+  "pkg": {
+    "outputPath": "build",
+    "assets": [
+      "node_modules/**/*",
+      "app.js"
+    ],
+    "targets": [
+      "node14-macos-x64",
+      "node14-win-x64",
+      "node14-linux-x64"
+    ]
+  },
+  "bin": "app.js",
+  "keywords": [],
+  "author": "Akash Chandra",
+  "license": "ISC"
+}
