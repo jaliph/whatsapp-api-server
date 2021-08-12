@@ -3,6 +3,7 @@ const basicAuth = require('express-basic-auth')
 const router = express.Router()
 const {
   sendMessage,
+  sendMedia,
   numberStatus
 } = require('../controller/controller')
 
@@ -35,6 +36,7 @@ const auth = basicAuth({
 
 router.get('/', auth, (req, res) => res.send('<html><title>WhatsApp Server!</title><body><h1>Welcome to WhatsApp Server! </h1><p>Made with &hearts; by Akash Chandra!</p></body></html>'))
 router.post('/sendMessage', auth, sendMessage)
+router.post('/sendMedia', auth, sendMedia)
 router.post('/numberStatus', auth, numberStatus)
 
 module.exports = router
