@@ -37,6 +37,16 @@ Routes exposed
   }
 }
 
+/sendMedia
+{
+  {
+    "number": "9148155203",
+    "countryCode": "91",
+    "fileName": "test.pdf"
+  }
+}
+Note : File must be kept inside the files folder in this repo.
+
 ```
 
 ## TroubleShooting
