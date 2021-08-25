@@ -142,7 +142,7 @@ const initializeallSenderfromDB = async () => {
       sender_state: 'T'
     }
   })
-  console.log('Found', SenderSinDB)
+  console.log('Found the Count of Senders in the DB : ', SenderSinDB.length)
   const processSenders = SenderSinDB.map((sender) => {
     return initializeWhatsAppClient(sender)
   })
