@@ -12,6 +12,7 @@
     "qrcode": "^1.4.4",
     "qrcode-terminal": "^0.12.0",
     "sequelize": "^6.6.5",
+    "tedious": "^12.0.0",
     "whatsapp-web.js": "^1.14.0"
   },
   "devDependencies": {
