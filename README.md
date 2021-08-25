@@ -16,6 +16,9 @@ export AUTH_USER=admin
 export AUTH_PASSWORD=Admin@123
 ```
 
+## DB config
+The application on start up will try to connect with mysql to initialise the senders present in the DB. The DB configurations are stored in the `config.js` file.
+
 The above envs are mandatory to provide httpAuth to the exposed routes
 
 ## Usage
@@ -31,14 +34,16 @@ Routes exposed
 {
     "number": "9148155203",
     "countryCode": "91",
-    "message": "Hello World"
+    "message": "Hello World",
+    "senderNumber": "91XXXXXXXXX"
 }
 
 /numberStatus
 {
   {
     "number": "9148155203",
-    "countryCode": "91"
+    "countryCode": "91",
+    "senderNumber": "91XXXXXXXXX"
   }
 }
 
@@ -47,7 +52,8 @@ Routes exposed
   {
     "number": "9148155203",
     "countryCode": "91",
-    "fileName": "test.pdf"
+    "fileName": "test.pdf",
+    "senderNumber": "91XXXXXXXXX"
   }
 }
 Note : File must be kept inside the files folder in this repo.
