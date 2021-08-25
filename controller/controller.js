@@ -25,12 +25,17 @@ const sendMessage = async (req, res) => {
     if (!client) {
       throw new Error(`${senderNumber} is not a valid sender registered with the system.`)
     }
-    const numberDetails = await numberChecker(client, number, countryCode)
-    if (numberDetails) {
-      await client.sendMessage(numberDetails._serialized, message)
-      res.status(200).json({ msg: 'Sent' })
+    const status = await client.getState()
+    if (status === 'CONNECTED') {
+      const numberDetails = await numberChecker(client, number, countryCode)
+      if (numberDetails) {
+        await client.sendMessage(numberDetails._serialized, message)
+        res.status(200).json({ msg: 'Sent' })
+      } else {
+        res.status(500).json({ error: 'Number is not registered with Whatsapp' })
+      }
     } else {
-      res.status(500).json({ error: 'Number is not registered with Whatsapp' })
+      res.status(404).json({ error: 'Sender is disconnected with the us. Kindly reauthorize with us!' })
     }
   } catch (error) {
     console.dir(error)
@@ -59,13 +64,18 @@ const sendMedia = async (req, res) => {
     if (!client) {
       throw new Error(`${senderNumber} is not a valid sender registered with the system.`)
     }
-    const media = MessageMedia.fromFilePath(path.resolve(path.join(__dirname, '../files/', fileName)))
-    const numberDetails = await numberChecker(client, number, countryCode)
-    if (numberDetails) {
-      await client.sendMessage(numberDetails._serialized, media)
-      res.status(200).json({ msg: 'Sent' })
+    const status = await client.getState()
+    if (status === 'CONNECTED') {
+      const media = MessageMedia.fromFilePath(path.resolve(path.join(__dirname, '../files/', fileName)))
+      const numberDetails = await numberChecker(client, number, countryCode)
+      if (numberDetails) {
+        await client.sendMessage(numberDetails._serialized, media)
+        res.status(200).json({ msg: 'Sent' })
+      } else {
+        res.status(500).json({ error: 'Number is not registered with Whatsapp' })
+      }
     } else {
-      res.status(500).json({ error: 'Number is not registered with Whatsapp' })
+      res.status(404).json({ error: 'Sender is disconnected with the us. Kindly reauthorize with us!' })
     }
   } catch (error) {
     console.dir(error)

@@ -21,12 +21,24 @@ const getSenderClient = (sender) => {
   return senderClientMap[sender]
 }
 
+// const getSenderClientState = async (sender) => {
+//   return await senderClientMap[sender].getState()
+//   // if (senderClientMap[sender]) {
+//   //   return await senderClientMap[sender].getState()
+//   // } else {
+//   //   return Promise.resolve('Sender is not registered with this app..')
+//   // }
+// }
+
 // const setSenderClient = (sender, client) => {
 //   senderClientMap[sender] = client
 // }
 
 const createWhatsAppClient = (sender) => {
   return new Promise((resolve, reject) => {
+    if (senderClientMap[sender]) {
+      senderClientMap[sender].destroy()
+    }
     senderClientMap[sender] = null // disconnect the previous client
     senderClientMap[sender] = new Client(/* { session: sessionCfg } */) // { puppeteer: { headless: true }, session: sessionCfg }
     senderClientMap[sender].on('qr', (qr) => {
@@ -131,9 +143,13 @@ const initializeallSenderfromDB = async () => {
     }
   })
   console.log('Found', SenderSinDB)
-  for (const senderData of SenderSinDB) {
-    await initializeWhatsAppClient(senderData)
-  }
+  const processSenders = SenderSinDB.map((sender) => {
+    return initializeWhatsAppClient(sender)
+  })
+  return await Promise.all(processSenders)
+  // for (const senderData of SenderSinDB) {
+  //   await initializeWhatsAppClient(senderData)
+  // }
 }
 
 const initializeWhatsAppClient = (senderData) => {
@@ -145,6 +161,12 @@ const initializeWhatsAppClient = (senderData) => {
       console.log(`${senderData.sender_number} sender is ready!`)
       resolve()
     })
+    senderClientMap[senderData.sender_number].on('auth_failure', async (msg) => {
+      // Fired if session restore was unsuccessfull
+      console.error('AUTHENTICATION FAILURE', msg)
+      await updateSenderinDB({ sender_number: senderData.sender_number }, false)
+      resolve()
+    })
     senderClientMap[senderData.sender_number].initialize()
   })
 }
@@ -153,5 +175,6 @@ module.exports = {
   createWhatsAppClient,
   initializeallSenderfromDB,
   getSenderClient
+  // getSenderClientState
   // getWhatsAppClient
 }

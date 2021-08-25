@@ -24,7 +24,6 @@ if (!AUTH_PASSWORD) {
 
 const auth = basicAuth({
   authorizer: (username, password, cb) => {
-    console.log(username, password)
     const userMatches = basicAuth.safeCompare(username, AUTH_USER)
     const passwordMatches = basicAuth.safeCompare(password, AUTH_PASSWORD)
     if (userMatches & passwordMatches) { return cb(null, true) } else { return cb(null, false) }
