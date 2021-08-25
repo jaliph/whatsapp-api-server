@@ -4,8 +4,9 @@ const cors = require('cors')
 const path = require('path')
 const fs = require('fs')
 const morgan = require('morgan')
+const db = require('./models')
 const router = require('./router/router')
-const { initializeWhatsAppClient } = require('./controller/whatsapputils')
+const { initializeallSenderfromDB } = require('./controller/whatsapputils')
 
 const PORT = process.env.PORT || 3000
 
@@ -19,7 +20,11 @@ app.use(express.json())
 
 app.use('/', router)
 
-initializeWhatsAppClient().then(() => {
-  console.log('listening on port :: ', PORT)
-  app.listen(PORT)
+db.sequelize.sync(/* { force: true } */).then(() => {
+  initializeallSenderfromDB().then(() => {
+    console.log('listening on port :: ', PORT)
+    app.listen(PORT)
+  })
+}).catch((err) => {
+  console.log('Start up failed with err', err)
 })

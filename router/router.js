@@ -4,7 +4,8 @@ const router = express.Router()
 const {
   sendMessage,
   sendMedia,
-  numberStatus
+  numberStatus,
+  createSender
 } = require('../controller/controller')
 
 const AUTH_USER = process.env.AUTH_USER
@@ -38,5 +39,6 @@ router.get('/', auth, (req, res) => res.send('<html><title>WhatsApp Server!</tit
 router.post('/sendMessage', auth, sendMessage)
 router.post('/sendMedia', auth, sendMedia)
 router.post('/numberStatus', auth, numberStatus)
+router.post('/createSender', auth, createSender)
 
 module.exports = router
