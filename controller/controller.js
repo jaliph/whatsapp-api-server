@@ -1,4 +1,5 @@
 const whatsAppUtils = require('./whatsapputils')
+const { findAllSenders } = require('./senderHelper')
 const { MessageMedia } = require('whatsapp-web.js')
 const path = require('path')
 const QRCode = require('qrcode')
@@ -88,7 +89,20 @@ const createSender = async (req, res) => {
     const { senderNumber } = req.body
     const qr = await whatsAppUtils.createWhatsAppClient(senderNumber)
     const qrString = await QRCode.toString(qr, { type: 'svg' })
-    const plainHTML = `<html><title>WhatsApp Server!</title> <style type="text/css" >svg{height:300px;}</style> <body><div>${qrString}</div></body></html>`
+    const plainHTML = `
+    <html>
+      <head>
+        <title>Authorize QR Code! - Whatsapp Web</title>
+        <style type="text/css" >svg{height:300px;}</style> 
+      </head>
+      <body>
+        <div>
+          <p>Scan the below QR code to authorize your account ${senderNumber} with us!</p>
+        </div>
+        <div>${qrString}</div>
+      </body>
+    </html>`
+    res.set('content-type', 'text/html')
     res.status(200).send(plainHTML)
   } catch (error) {
     console.log(error)
@@ -106,9 +120,31 @@ const checkClientConnectedState = async (client) => {
   }
 }
 
+const listAllActiveSenders = async (req, res) => {
+  try {
+    const activeSenders = whatsAppUtils.getAllSendersClientList()
+    res.status(200).json({ activeSenders })
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({ error: error.message })
+  }
+}
+
+const listAllSenders = async (req, res) => {
+  try {
+    const allSenders = await findAllSenders()
+    res.status(200).json({ allSenders })
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({ error: error.message })
+  }
+}
+
 module.exports = {
   sendMessage,
   numberStatus,
   sendMedia,
-  createSender
+  createSender,
+  listAllActiveSenders,
+  listAllSenders
 }

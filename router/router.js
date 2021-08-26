@@ -5,7 +5,9 @@ const {
   sendMessage,
   sendMedia,
   numberStatus,
-  createSender
+  createSender,
+  listAllActiveSenders,
+  listAllSenders
 } = require('../controller/controller')
 
 const AUTH_USER = process.env.AUTH_USER
@@ -39,5 +41,7 @@ router.post('/sendMessage', auth, sendMessage)
 router.post('/sendMedia', auth, sendMedia)
 router.post('/numberStatus', auth, numberStatus)
 router.post('/createSender', auth, createSender)
+router.get('/listActiveSenders', auth, listAllActiveSenders)
+router.get('/listSenders', auth, listAllSenders)
 
 module.exports = router

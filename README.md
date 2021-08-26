@@ -30,7 +30,13 @@ A QR code will be displayed on the terminal, use that to authenticate from the W
 Routes exposed
 
 ```
-/sendMessage
+POST /createSender 
+{
+  "senderNumber": "91XXXXXXXXX"
+}
+Gives QR Code to register the sender
+
+POST /sendMessage
 {
     "number": "9148155203",
     "countryCode": "91",
@@ -38,25 +44,25 @@ Routes exposed
     "senderNumber": "91XXXXXXXXX"
 }
 
-/numberStatus
+POST /numberStatus
 {
-  {
     "number": "9148155203",
     "countryCode": "91",
     "senderNumber": "91XXXXXXXXX"
-  }
 }
 
-/sendMedia
+POST /sendMedia
 {
-  {
     "number": "9148155203",
     "countryCode": "91",
     "fileName": "test.pdf",
     "senderNumber": "91XXXXXXXXX"
-  }
 }
 Note : File must be kept inside the files folder in this repo.
+
+GET /listActiveSenders
+
+GET /listSenders
 
 ```
 
