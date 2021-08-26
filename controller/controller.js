@@ -13,7 +13,7 @@ const numberStatus = async (req, res) => {
     const result = await numberChecker(client, number, countryCode)
     return res.status(200).json({ result })
   } catch (error) {
-    console.dir(error)
+    console.log(error)
     return res.status(500).json({ error: error.message })
   }
 }
@@ -25,7 +25,7 @@ const sendMessage = async (req, res) => {
     if (!client) {
       throw new Error(`${senderNumber} is not a valid sender registered with the system.`)
     }
-    const status = await client.getState()
+    const status = await checkClientConnectedState(client)
     if (status === 'CONNECTED') {
       const numberDetails = await numberChecker(client, number, countryCode)
       if (numberDetails) {
@@ -38,7 +38,7 @@ const sendMessage = async (req, res) => {
       res.status(404).json({ error: 'Sender is disconnected with the us. Kindly reauthorize with us!' })
     }
   } catch (error) {
-    console.dir(error)
+    console.log(error)
     return res.status(500).json({ error: error.message })
   }
 }
@@ -64,7 +64,7 @@ const sendMedia = async (req, res) => {
     if (!client) {
       throw new Error(`${senderNumber} is not a valid sender registered with the system.`)
     }
-    const status = await client.getState()
+    const status = await checkClientConnectedState(client)
     if (status === 'CONNECTED') {
       const media = MessageMedia.fromFilePath(path.resolve(path.join(__dirname, '../files/', fileName)))
       const numberDetails = await numberChecker(client, number, countryCode)
@@ -75,10 +75,10 @@ const sendMedia = async (req, res) => {
         res.status(500).json({ error: 'Number is not registered with Whatsapp' })
       }
     } else {
-      res.status(404).json({ error: 'Sender is disconnected with the us. Kindly reauthorize with us!' })
+      res.status(404).json({ error: 'Sender is disconnected with the us. Kindly reauthorize again!' })
     }
   } catch (error) {
-    console.dir(error)
+    console.log(error)
     return res.status(500).json({ error: error.message })
   }
 }
@@ -91,8 +91,18 @@ const createSender = async (req, res) => {
     const plainHTML = `<html><title>WhatsApp Server!</title> <style type="text/css" >svg{height:300px;}</style> <body><div>${qrString}</div></body></html>`
     res.status(200).send(plainHTML)
   } catch (error) {
-    console.dir(error)
+    console.log(error)
     return res.status(500).json({ error: error.message })
+  }
+}
+
+const checkClientConnectedState = async (client) => {
+  try {
+    const status = await client.getState()
+    return status
+  } catch (error) {
+    console.log('Error while checking client state ', error)
+    return 'NOT CONNECTED'
   }
 }
 

@@ -1,9 +1,9 @@
 
 const { Client } = require('whatsapp-web.js')
+const { findSenderbyNumber, createSender, updateSender, findAllActiveSenders } = require('./senderHelper')
 // const qrcode = require('qrcode-terminal')
 // const path = require('path')
 // const fs = require('fs')
-const Sender = require('../models/index').Sender
 // const { resolve } = require('path')
 
 // const SESSION_FILE_PATH = path.resolve(path.join(__dirname, '../session.json'))
@@ -20,19 +20,6 @@ const senderClientMap = {}
 const getSenderClient = (sender) => {
   return senderClientMap[sender]
 }
-
-// const getSenderClientState = async (sender) => {
-//   return await senderClientMap[sender].getState()
-//   // if (senderClientMap[sender]) {
-//   //   return await senderClientMap[sender].getState()
-//   // } else {
-//   //   return Promise.resolve('Sender is not registered with this app..')
-//   // }
-// }
-
-// const setSenderClient = (sender, client) => {
-//   senderClientMap[sender] = client
-// }
 
 const createWhatsAppClient = (sender) => {
   return new Promise((resolve, reject) => {
@@ -53,14 +40,16 @@ const createWhatsAppClient = (sender) => {
     })
 
     senderClientMap[sender].on('authenticated', async (session) => {
-      console.log('AUTHENTICATED', session)
+      // console.log('AUTHENTICATED', session)
+      console.log(`${sender} just got authenticated with our app.. putting it in DB`)
       // sessionCfg = session
       const sessionString = JSON.stringify(session)
-      const senderExist = await checkSenderExistinDB(sender)
+      const senderExist = await checkSenderExistInDB(sender)
       if (senderExist) {
         try {
           console.log(`Found the sender ${sender} in the DB, trying to update it`)
-          await updateSenderinDB({ sender_number: sender, sender_session: sessionString }, true)
+          await updateSessionForSender(sessionString, sender)
+          // await updateSenderinDB({ sender_number: sender, sender_session: sessionString }, true)
         } catch (error) {
           console.log(`Found the sender ${sender} in the DB, Failed to update it`)
           console.log(error)
@@ -68,7 +57,8 @@ const createWhatsAppClient = (sender) => {
       } else {
         try {
           console.log(`Creating the sender ${sender} in the DB`)
-          await createSenderinDB(sender, sessionString)
+          // await createSenderinDB(sender, sessionString)
+          await createSender({ sender: sender, session: sessionString, state: 'T' })
         } catch (error) {
           console.log(`Failed to create the sender ${sender} in the DB`)
           console.log(error)
@@ -85,71 +75,39 @@ const createWhatsAppClient = (sender) => {
     senderClientMap[sender].on('auth_failure', async (msg) => {
       // Fired if session restore was unsuccessfull
       console.error('AUTHENTICATION FAILURE', msg)
-      await updateSenderinDB({ sender_number: sender }, false)
+      // await updateSenderinDB({ sender_number: sender }, false)
+      await updateStateForSender('F', sender)
     })
 
     senderClientMap[sender].initialize()
   })
 }
 
-const checkSenderExistinDB = async (sender) => {
-  const SenderinDB = await Sender.findAll({
-    where: {
-      sender_number: sender
-    }
-  })
-  console.log('Value from checkSenderExistinDB', SenderinDB)
-  return SenderinDB[0] || null
+const checkSenderExistInDB = async (sender) => {
+  return await findSenderbyNumber(sender)
 }
 
-const createSenderinDB = async (sender, session) => {
-  return await Sender.create({
-    sender_number: sender,
-    sender_session: session,
+const updateSessionForSender = async (senderSession, sender) => {
+  return await updateSender({
+    sender_session: senderSession,
     sender_state: 'T'
-  })
+  }, sender)
 }
 
-const updateSenderinDB = async (senderObj, flag) => {
-  if (flag) {
-    // update the session and state of the sender --  called on refresh
-    const { sender_number, sender_session } = senderObj
-    return await Sender.update({
-      sender_session: sender_session,
-      sender_state: 'T'
-    }, {
-      where: {
-        sender_number: sender_number
-      }
-    })
-  } else {
-    // Expire the state of the sender
-    const { sender_number } = senderObj
-    return await Sender.update({
-      sender_state: 'F'
-    }, {
-      where: {
-        sender_number: sender_number
-      }
-    })
-  }
+const updateStateForSender = async (state, sender) => {
+  return await updateSender({
+    sender_state: state
+  }, sender)
 }
 
-const initializeallSenderfromDB = async () => {
+const initializeAllSenderFromDB = async () => {
   console.log('Getting all the existing senders from the DB')
-  const SenderSinDB = await Sender.findAll({
-    where: {
-      sender_state: 'T'
-    }
-  })
-  console.log('Found the Count of Senders in the DB : ', SenderSinDB.length)
-  const processSenders = SenderSinDB.map((sender) => {
+  const activeSenders = await findAllActiveSenders()
+  console.log('Found the Count of Senders in the DB : ', activeSenders.length)
+  const processSenders = activeSenders.map((sender) => {
     return initializeWhatsAppClient(sender)
   })
   return await Promise.all(processSenders)
-  // for (const senderData of SenderSinDB) {
-  //   await initializeWhatsAppClient(senderData)
-  // }
 }
 
 const initializeWhatsAppClient = (senderData) => {
@@ -164,17 +122,22 @@ const initializeWhatsAppClient = (senderData) => {
     senderClientMap[senderData.sender_number].on('auth_failure', async (msg) => {
       // Fired if session restore was unsuccessfull
       console.error('AUTHENTICATION FAILURE', msg)
-      await updateSenderinDB({ sender_number: senderData.sender_number }, false)
+      await updateStateForSender('F', senderData.sender_number)
       resolve()
     })
     senderClientMap[senderData.sender_number].initialize()
   })
 }
 
+const getAllSendersClientList = () => {
+  return Object.keys(senderClientMap)
+}
+
 module.exports = {
   createWhatsAppClient,
-  initializeallSenderfromDB,
-  getSenderClient
+  initializeAllSenderFromDB,
+  getSenderClient,
+  getAllSendersClientList
   // getSenderClientState
   // getWhatsAppClient
 }

@@ -6,7 +6,7 @@ const fs = require('fs')
 const morgan = require('morgan')
 const db = require('./models')
 const router = require('./router/router')
-const { initializeallSenderfromDB } = require('./controller/whatsapputils')
+const { initializeAllSenderFromDB } = require('./controller/whatsapputils')
 
 const PORT = process.env.PORT || 3000
 
@@ -21,7 +21,7 @@ app.use(express.json())
 app.use('/', router)
 
 db.sequelize.sync(/* { force: true } */).then(() => {
-  initializeallSenderfromDB().then(() => {
+  initializeAllSenderFromDB().then(() => {
     console.log('listening on port :: ', PORT)
     app.listen(PORT)
   })
