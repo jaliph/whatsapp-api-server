@@ -32,7 +32,7 @@ const sendMessage = async (req, res) => {
       const numberDetails = await numberChecker(client, number, countryCode)
       if (numberDetails) {
         const msg = await client.sendMessage(numberDetails._serialized, message)
-        await createMessageDBEntry(senderNumber, msg.from, msg.to, msg.body, null, chatType)
+        if (chatType==='chat') await createMessageDBEntry(senderNumber, msg.from, msg.to, msg.body, null, chatType)
         res.status(200).json({ msg: 'Sent' })
       } else {
         res.status(500).json({ error: 'Number is not registered with Whatsapp' })

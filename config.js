@@ -1,9 +1,9 @@
-const mysqlDatabase = process.env.DATABASE || 'whatsapp-db' // 'FBP_Whatsapp'
-const mysqlHost = process.env.DB_HOST || '9.30.230.198' // '146.88.27.110'
-const mysqlUser = process.env.DB_USER || 'admin' // 'rnd'
-const mysqlPassword = process.env.DB_PASS || 'Admin@123' // 'rnd@321456'
-const mysqlPort = process.env.DB_PORT || '3306' // '1433'
-const dialect = 'mysql' // 'mssql'
+const mysqlDatabase = process.env.DATABASE || 'FBP_Whatsapp'
+const mysqlHost = process.env.DB_HOST || '146.88.27.110'
+const mysqlUser = process.env.DB_USER || 'rnd'
+const mysqlPassword = process.env.DB_PASS || 'rnd@321456'
+const mysqlPort = process.env.DB_PORT || '1433'
+const dialect = 'mssql'
 const elasticsearchHost = process.env.ELASTIC_HOST || ['http://9.30.43.28:8200']
 const elasticUser = process.env.ELASTIC_USER || 'admin'
 const elasticPass = process.env.ELASTIC_PASS || null
