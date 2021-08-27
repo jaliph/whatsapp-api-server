@@ -1,6 +1,7 @@
 
 const { Client } = require('whatsapp-web.js')
 const { findSenderbyNumber, createSender, updateSender, findAllActiveSenders } = require('./senderHelper')
+const { createMessage } = require('./messageHelper')
 // const qrcode = require('qrcode-terminal')
 // const path = require('path')
 // const fs = require('fs')
@@ -72,6 +73,10 @@ const createWhatsAppClient = (sender) => {
       // })
     })
 
+    senderClientMap[sender].on('message', async msg => {
+      await createMessage(sender, msg.from, msg.to, msg.body, null, 'Incoming')
+    })
+
     senderClientMap[sender].on('auth_failure', async (msg) => {
       // Fired if session restore was unsuccessfull
       console.error('AUTHENTICATION FAILURE', msg)
@@ -120,17 +125,28 @@ const initializeWhatsAppClient = (senderData) => {
       resolve()
     })
     senderClientMap[senderData.sender_number].on('auth_failure', async (msg) => {
-      // Fired if session restore was unsuccessfull
+      // Fired if session restore was unsuccessful
       console.error(`AUTHENTICATION FAILURE for ${senderData.sender_number}`, msg)
       await updateStateForSender('F', senderData.sender_number)
+      senderClientMap[senderData.sender_number].destroy()
+      senderClientMap[senderData.sender_number] = null
       resolve()
+    })
+    senderClientMap[senderData.sender_number].on('message', async msg => {
+      await createMessage(senderData.sender_number, msg.from, msg.to, msg.body, null, 'Incoming')
     })
     senderClientMap[senderData.sender_number].initialize()
   })
 }
 
 const getAllSendersClientList = () => {
-  return Object.keys(senderClientMap)
+  const clientList = []
+  for (const sender in Object.keys(senderClientMap)) {
+    if (senderClientMap[sender]) {
+      clientList.push(senderClientMap[sender])
+    }
+  }
+  return clientList
 }
 
 module.exports = {
@@ -140,5 +156,5 @@ module.exports = {
   getAllSendersClientList
   // getSenderClientState
   // getWhatsAppClient
-  // Test Pull Push 
+  // Test Pull Push
 }

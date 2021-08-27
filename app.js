@@ -15,7 +15,7 @@ const accessLogStream = fs.createWriteStream(path.join(process.cwd(), 'access.lo
 const app = express()
 app.use(cors())
 app.use(morgan('combined', { stream: accessLogStream }))
-app.use(express.urlencoded())
+app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
 app.use('/', router)
