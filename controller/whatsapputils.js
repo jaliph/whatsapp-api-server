@@ -121,7 +121,7 @@ const initializeWhatsAppClient = (senderData) => {
     })
     senderClientMap[senderData.sender_number].on('auth_failure', async (msg) => {
       // Fired if session restore was unsuccessfull
-      console.error('AUTHENTICATION FAILURE', msg)
+      console.error(`AUTHENTICATION FAILURE for ${senderData.sender_number}`, msg)
       await updateStateForSender('F', senderData.sender_number)
       resolve()
     })
