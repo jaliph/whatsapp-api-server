@@ -112,7 +112,7 @@ const initializeAllSenderFromDB = async () => {
 
 const initializeWhatsAppClient = (senderData) => {
   return new Promise((resolve, reject) => {
-    console.log('Working on SenderData', JSON.stringify(senderData))
+    console.log(`Activating the sender ${senderData.sender_number}...`)
     senderClientMap[senderData.sender_number] = null // disconnect the previous client
     senderClientMap[senderData.sender_number] = new Client({ session: JSON.parse(senderData.sender_session) }) // { puppeteer: { headless: true }, session: sessionCfg }
     senderClientMap[senderData.sender_number].on('ready', () => {
