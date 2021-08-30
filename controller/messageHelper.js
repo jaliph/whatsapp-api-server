@@ -1,6 +1,6 @@
 const Message = require('../models/index').Message
 
-const createMessage = async (sender, from, to, body, file, type='chat') => {
+const createMessage = async (sender, from, to, body, file, type = 'chat') => {
   return await Message.create({
     message_sender: sender,
     message_from: from,
