@@ -32,10 +32,10 @@ const sendMessage = async (req, res) => {
       const numberDetails = await numberChecker(client, number, countryCode)
       if (numberDetails) {
         const msg = await client.sendMessage(numberDetails._serialized, message)
-        if (chatType==='chat') await createMessageDBEntry(senderNumber, msg.from, msg.to, msg.body, null, chatType)
+        if (chatType === 'chat') await createMessageDBEntry(senderNumber, msg.from, msg.to, msg.body, null, chatType)
         res.status(200).json({ msg: 'Sent' })
       } else {
-        res.status(500).json({ error: 'Number is not registered with Whatsapp' })
+        res.status(500).json({ error: 'Number is not registered with Whats App' })
       }
     } else {
       res.status(404).json({ error: 'Sender is disconnected with the us. Kindly reauthorize with us!' })
@@ -91,9 +91,14 @@ const createSender = async (req, res) => {
   try {
     const { senderNumber } = req.body
     const qr = await whatsAppUtils.createWhatsAppClient(senderNumber)
-    const plainHTML = await qrHTMLMaker(qr, senderNumber)
-    res.set('content-type', 'text/html')
-    return res.status(200).send(plainHTML)
+    if (req.query.svg === 'true') {
+      const qrString = await QRCode.toString(qr, { type: 'svg' })
+      return res.status(200).send(qrString)
+    } else {
+      const plainHTML = await qrHTMLMaker(qr, senderNumber)
+      res.set('content-type', 'text/html')
+      return res.status(200).send(plainHTML)
+    }
   } catch (error) {
     console.log(error)
     return res.status(500).json({ error: error.message })
