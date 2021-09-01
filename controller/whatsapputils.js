@@ -149,9 +149,9 @@ const initializeWhatsAppClient = (senderData) => {
 
 const getAllSendersClientList = () => {
   const clientList = []
-  for (const sender in Object.keys(senderClientMap)) {
+  for (const sender of Object.keys(senderClientMap)) {
     if (senderClientMap[sender]) {
-      clientList.push(senderClientMap[sender])
+      clientList.push(sender)
     }
   }
   return clientList
