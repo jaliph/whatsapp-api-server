@@ -28,6 +28,10 @@ module.exports = function (sequelize, DataTypes) {
     message_media: {
       type: DataTypes.STRING(500),
       allowNull: true
+    },
+    message_profile: {
+      type: DataTypes.STRING(500),
+      allowNull: true
     }
   }, {
     tableName: 'message_master',

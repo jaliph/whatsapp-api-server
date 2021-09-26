@@ -152,6 +152,13 @@ const initializeWhatsAppClient = (senderData) => {
 const messageCreater = async (sender, message) => {
   try {
     console.log(`Received a message for the sender ${sender}, Trying to insert the same in the database..`)
+    let profilePic
+    try {
+      const contact = await message.getContact()
+      profilePic = await contact.getProfilePicUrl()
+    } catch (error) {
+      console.error('Caught an error while fetching the profile pic', error)
+    }
     if (message.hasMedia) {
       const msgMedia = await message.downloadMedia()
       const fileExtension = mime.extension(msgMedia.mimetype)
@@ -161,10 +168,10 @@ const messageCreater = async (sender, message) => {
       const pathToWrite = path.join(__dirname, '../receivedFile', fileName)
       console.log('Writing the media to the file ', pathToWrite)
       await writeToFile(pathToWrite, fileContents)
-      await createMessage(sender, message.from, message.to, message.body, fileName, 'Incoming')
+      await createMessage(sender, message.from, message.to, message.body, fileName, 'Incoming', profilePic)
     } else {
       console.log('Got a message without Media from ', sender)
-      await createMessage(sender, message.from, message.to, message.body, null, 'Incoming')
+      await createMessage(sender, message.from, message.to, message.body, null, 'Incoming', profilePic)
     }
   } catch (error) {
     console.log('Error while doing an entry in the DB for Incoming message', error)
