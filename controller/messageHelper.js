@@ -6,7 +6,7 @@ const createMessage = async (sender, from, to, body, file, type = 'chat') => {
     message_from: from,
     message_to: to,
     message_body: body,
-    message_file: file,
+    message_media: file,
     message_type: type
   })
 }
