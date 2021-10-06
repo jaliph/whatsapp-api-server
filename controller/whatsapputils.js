@@ -2,9 +2,11 @@
 const { Client } = require('whatsapp-web.js')
 const { findSenderbyNumber, createSender, updateSender, findAllActiveSenders } = require('./senderHelper')
 const { createMessage } = require('./messageHelper')
+const mime = require('mime-types')
+const fs = require('fs')
+const path = require('path')
 // const qrcode = require('qrcode-terminal')
-// const path = require('path')
-// const fs = require('fs')
+
 // const { resolve } = require('path')
 
 // const SESSION_FILE_PATH = path.resolve(path.join(__dirname, '../session.json'))
@@ -75,7 +77,7 @@ const createWhatsAppClient = (sender) => {
 
     senderClientMap[sender].on('message', async msg => {
       try {
-        await createMessage(sender, msg.from, msg.to, msg.body, null, 'Incoming')
+        await messageCreater(sender, msg)
       } catch (error) {
         console.log('Error while doing an entry in the DB for Incoming message', error)
       }
@@ -138,13 +140,42 @@ const initializeWhatsAppClient = (senderData) => {
     })
     senderClientMap[senderData.sender_number].on('message', async msg => {
       try {
-        await createMessage(senderData.sender_number, msg.from, msg.to, msg.body, null, 'Incoming')
+        await messageCreater(senderData.sender_number, msg)
       } catch (error) {
         console.log('Error while doing an entry in the DB for Incoming message', error)
       }
     })
     senderClientMap[senderData.sender_number].initialize()
   })
+}
+
+const messageCreater = async (sender, message) => {
+  try {
+    console.log(`Received a message for the sender ${sender}, Trying to insert the same in the database..`)
+    let profilePic
+    try {
+      const contact = await message.getContact()
+      profilePic = await contact.getProfilePicUrl()
+    } catch (error) {
+      console.error('Caught an error while fetching the profile pic', error)
+    }
+    if (message.hasMedia) {
+      const msgMedia = await message.downloadMedia()
+      const fileExtension = mime.extension(msgMedia.mimetype)
+      console.log('Got a message with Media with type ', fileExtension, ' from ', sender)
+      const fileContents = new Buffer(msgMedia.data, 'base64')
+      const fileName = message.from + '-' + Date.now() + '.' + fileExtension
+      const pathToWrite = path.join(__dirname, '../receivedFile', fileName)
+      console.log('Writing the media to the file ', pathToWrite)
+      await writeToFile(pathToWrite, fileContents)
+      await createMessage(sender, message.from, message.to, message.body, fileName, 'Incoming', profilePic)
+    } else {
+      console.log('Got a message without Media from ', sender)
+      await createMessage(sender, message.from, message.to, message.body, null, 'Incoming', profilePic)
+    }
+  } catch (error) {
+    console.log('Error while doing an entry in the DB for Incoming message', error)
+  }
 }
 
 const getAllSendersClientList = () => {
@@ -157,11 +188,23 @@ const getAllSendersClientList = () => {
   return clientList
 }
 
+const writeToFile = (filePath, data) => {
+  return new Promise((resolve, reject) => {
+    fs.writeFile(filePath, data, function (err) {
+      if (err) {
+        reject(err)
+      }
+      resolve()
+    })
+  })
+}
+
 module.exports = {
   createWhatsAppClient,
   initializeAllSenderFromDB,
   getSenderClient,
-  getAllSendersClientList
+  getAllSendersClientList,
+  messageCreater
   // getSenderClientState
   // getWhatsAppClient
   // Test Pull Push
