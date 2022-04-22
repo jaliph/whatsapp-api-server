@@ -1,10 +1,11 @@
 
-const { Client } = require('whatsapp-web.js')
+const { Client, LocalAuth } = require('whatsapp-web.js')
 const { findSenderbyNumber, createSender, updateSender, findAllActiveSenders } = require('./senderHelper')
 const { createMessage } = require('./messageHelper')
 const mime = require('mime-types')
 const fs = require('fs')
 const path = require('path')
+const WHATSAPP_AUTH_DATA_PATH = path.resolve(path.join(__dirname, '../auth_directory'))
 // const qrcode = require('qrcode-terminal')
 
 // const { resolve } = require('path')
@@ -30,7 +31,10 @@ const createWhatsAppClient = (sender) => {
       senderClientMap[sender].destroy()
     }
     senderClientMap[sender] = null // disconnect the previous client
-    senderClientMap[sender] = new Client(/* { session: sessionCfg } */) // { puppeteer: { headless: true }, session: sessionCfg }
+    // senderClientMap[sender] = new Client(/* { session: sessionCfg } */) // { puppeteer: { headless: true }, session: sessionCfg }
+    senderClientMap[sender] = new Client({
+      authStrategy: new LocalAuth({ clientId: sender, dataPath: WHATSAPP_AUTH_DATA_PATH })
+    })
     senderClientMap[sender].on('qr', (qr) => {
       // Generate and scan this code with your phone
       // qrcode.generate(qr, { small: true })
@@ -46,7 +50,8 @@ const createWhatsAppClient = (sender) => {
       // console.log('AUTHENTICATED', session)
       console.log(`${sender} just got authenticated with our app.. putting it in DB`)
       // sessionCfg = session
-      const sessionString = JSON.stringify(session)
+      // const sessionString = JSON.stringify(session)
+      const sessionString = sender
       const senderExist = await checkSenderExistInDB(sender)
       if (senderExist) {
         try {
@@ -125,7 +130,11 @@ const initializeWhatsAppClient = (senderData) => {
   return new Promise((resolve, reject) => {
     console.log(`Activating the sender ${senderData.sender_number}...`)
     senderClientMap[senderData.sender_number] = null // disconnect the previous client
-    senderClientMap[senderData.sender_number] = new Client({ session: JSON.parse(senderData.sender_session) }) // { puppeteer: { headless: true }, session: sessionCfg }
+    // senderClientMap[senderData.sender_number] = new Client({ session: JSON.parse(senderData.sender_session) }) // { puppeteer: { headless: true }, session: sessionCfg }
+    // console.dir(WHATSAPP_AUTH_DATA_PATH)
+    senderClientMap[senderData.sender_number] = new Client({
+      authStrategy: new LocalAuth({ clientId: senderData.sender_number, dataPath: WHATSAPP_AUTH_DATA_PATH })
+    })
     senderClientMap[senderData.sender_number].on('ready', () => {
       console.log(`${senderData.sender_number} sender is ready!`)
       resolve()
