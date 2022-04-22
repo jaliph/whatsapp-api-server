@@ -73,7 +73,7 @@ const sendMedia = async (req, res) => {
       const numberDetails = await numberChecker(client, number, countryCode)
       if (numberDetails) {
         const msg = await client.sendMessage(numberDetails._serialized, media)
-        await createMessageDBEntry(senderNumber, msg.from, msg.to, null, fileName, chatType)
+        await createMessageDBEntry(senderNumber, msg.from, msg.to, 'THIS IS OF MEDIA TYPE', fileName, chatType)
         res.status(200).json({ msg: 'Sent' })
       } else {
         res.status(500).json({ error: 'Number is not registered with Whatsapp' })
