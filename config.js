@@ -1,7 +1,7 @@
 const mysqlDatabase = process.env.DATABASE || 'FBP_Whatsapp'
-const mysqlHost = process.env.DB_HOST || '146.88.27.110'
-const mysqlUser = process.env.DB_USER || 'rnd'
-const mysqlPassword = process.env.DB_PASS || 'rnd@321456'
+const mysqlHost = process.env.DB_HOST || 'localhost'
+const mysqlUser = process.env.DB_USER || 'user'
+const mysqlPassword = process.env.DB_PASS || 'password'
 const mysqlPort = process.env.DB_PORT || '1433'
 const dialect = 'mssql'
 const elasticsearchHost = process.env.ELASTIC_HOST || ['http://9.30.43.28:8200']
